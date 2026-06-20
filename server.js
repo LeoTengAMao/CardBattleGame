@@ -131,6 +131,17 @@ addRoute('GET', '/', ({ res, send }) => {
   }
 });
 
+// ---- 發送遊戲核心邏輯 (engine.js) ----
+addRoute('GET', '/engine.js', ({ res, send }) => {
+  try {
+    const js = fs.readFileSync(path.join(__dirname, 'engine.js'), 'utf8');
+    res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+    res.end(js);
+  } catch (e) {
+    send(404, { error: '找不到 engine.js 檔案' });
+  }
+});
+
 function send(res, status, obj) {
   const body = JSON.stringify(obj);
   res.writeHead(status, {
