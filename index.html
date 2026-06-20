@@ -158,6 +158,32 @@
     .vs-bar{ flex-direction:column; }
     .vs-mid{ order:-1; width:auto; }
   }
+
+  /* ---- 帳號系統 ---- */
+  .acct-bar{ display:flex; justify-content:center; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; font-size:13px; }
+  .acct-bar .acct-info{ color:var(--ink-dim); }
+  .acct-bar .acct-info b{ color:var(--gold); }
+  .acct-bar .linklike{ background:none; border:none; color:var(--gold); cursor:pointer; font-size:13px; text-decoration:underline; padding:0; }
+  .nav-row{ display:flex; gap:8px; justify-content:center; margin-bottom:18px; flex-wrap:wrap; }
+  .nav-row .btn.secondary.active{ border-color:var(--gold); color:var(--gold); }
+  .auth-toggle{ display:flex; gap:8px; margin-bottom:16px; }
+  .auth-toggle button{ flex:1; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--bg-card); color:var(--ink-dim); cursor:pointer; font-weight:700; }
+  .auth-toggle button.active{ border-color:var(--gold); color:var(--gold); background:var(--gold-soft); }
+  .form-error{ color:var(--crimson); font-size:13px; min-height:18px; }
+  .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:8px; }
+  .stat-box{ background:var(--bg-card); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center; }
+  .stat-box .num{ font-family:'Bebas Neue'; font-size:26px; color:var(--gold); }
+  .stat-box .lbl{ font-size:11px; color:var(--ink-dim); }
+  .lb-row{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--line); font-size:13px; }
+  .lb-row:last-child{ border-bottom:none; }
+  .lb-rank{ width:28px; font-family:'Bebas Neue'; font-size:18px; color:var(--gold); }
+  .lb-name{ flex:1; font-weight:600; }
+  .lb-stat{ color:var(--ink-dim); font-size:12px; }
+  .friend-row{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--line); font-size:13px; }
+  .friend-row:last-child{ border-bottom:none; }
+  .friend-row .fname{ flex:1; font-weight:600; }
+  .friend-row .btn{ padding:6px 12px; font-size:12px; }
+  .empty-note{ color:var(--ink-dim); font-size:13px; padding:8px 0; text-align:center; }
 </style>
 </head>
 <body>
@@ -167,6 +193,83 @@
     <div class="eyebrow">Online Tactical Card Duel</div>
     <h1>決鬥<span>力場</span></h1>
     <p>回合制連線卡牌格鬥・選角色・出萬用牌與技能牌・在場地中決一勝負</p>
+  </div>
+
+  <div class="acct-bar" id="acct-bar">
+    <span class="acct-info" id="acct-info-text">尚未登入（可先以訪客身分遊玩，但戰績不會被記錄）</span>
+    <button class="linklike" id="btn-acct-action">登入 / 註冊</button>
+  </div>
+
+  <div class="nav-row" id="nav-row">
+    <button class="btn secondary active" data-nav="screen-lobby">對戰</button>
+    <button class="btn secondary" data-nav="screen-leaderboard">排行榜</button>
+    <button class="btn secondary" data-nav="screen-friends">好友</button>
+  </div>
+
+  <!-- ===== Screen Auth: 登入 / 註冊 ===== -->
+  <div class="screen" id="screen-auth">
+    <div class="panel" style="max-width:420px; margin:0 auto;">
+      <div class="auth-toggle">
+        <button id="tab-login" class="active">登入</button>
+        <button id="tab-register">註冊</button>
+      </div>
+      <div class="row" style="flex-direction:column; align-items:stretch; gap:10px;">
+        <input type="text" id="auth-username" placeholder="帳號（3-20字元）">
+        <input type="text" id="auth-password" placeholder="密碼（至少6字元）">
+      </div>
+      <p class="form-error" id="auth-error"></p>
+      <div class="row" style="margin-top:6px;">
+        <button class="btn" id="btn-auth-submit" style="flex:1;">登入</button>
+        <button class="btn secondary" id="btn-auth-cancel">略過，先玩玩看</button>
+      </div>
+      <p class="hint" style="margin-top:14px;">登入後對戰結束會自動把結果記錄到你的帳號（勝/敗/平），可以在排行榜跟好友互相比較戰績。不想註冊也可以直接「略過」用訪客身分玩。</p>
+    </div>
+  </div>
+
+  <!-- ===== Screen Leaderboard ===== -->
+  <div class="screen" id="screen-leaderboard">
+    <div class="panel" id="my-stats-panel" style="display:none;">
+      <h2>我的戰績</h2>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="num" id="stat-wins">0</div><div class="lbl">勝場</div></div>
+        <div class="stat-box"><div class="num" id="stat-losses">0</div><div class="lbl">敗場</div></div>
+        <div class="stat-box"><div class="num" id="stat-draws">0</div><div class="lbl">平手</div></div>
+        <div class="stat-box"><div class="num" id="stat-winrate">0%</div><div class="lbl">勝率</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;">
+        <h2 style="margin:0;">排行榜</h2>
+        <button class="btn secondary" id="btn-refresh-lb">重新整理</button>
+      </div>
+      <div id="leaderboard-list" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- ===== Screen Friends ===== -->
+  <div class="screen" id="screen-friends">
+    <div class="panel" id="friends-login-note" style="display:none;">
+      <p class="center-note">登入後才能使用好友功能，請先到上方「登入 / 註冊」。</p>
+    </div>
+    <div id="friends-content" style="display:none;">
+      <div class="panel">
+        <h2>加好友</h2>
+        <div class="row">
+          <input type="text" id="add-friend-input" placeholder="輸入對方帳號">
+          <button class="btn" id="btn-add-friend">送出邀請</button>
+        </div>
+        <p class="form-error" id="friend-error"></p>
+      </div>
+      <div class="panel" id="incoming-panel" style="display:none;">
+        <h2>收到的邀請</h2>
+        <div id="incoming-list"></div>
+      </div>
+      <div class="panel">
+        <h2>我的好友</h2>
+        <div id="friends-list"></div>
+        <div id="outgoing-list"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ===== Screen 0: Lobby ===== -->
@@ -267,6 +370,228 @@
 <script src="engine.js"></script>
 <script>
 /* =========================================================================
+   PART A2 — 帳號系統前端邏輯
+   -------------------------------------------------------------------------
+   跟後端 server.js 溝通：登入/註冊、戰績、好友、排行榜。
+   登入狀態（token、username）存在 localStorage，重新整理頁面後還會記得。
+   未登入時遊戲一樣可以玩（訪客身分），只是對戰結束不會被記錄戰績。
+   ========================================================================= */
+
+// 部署後端後，把這裡改成你的後端網址（不要加結尾斜線）
+const API_BASE = 'https://leotengamao.github.io/CardBattleGame';
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+let authToken = localStorage.getItem('duelfield_token') || null;
+let authUsername = localStorage.getItem('duelfield_username') || null;
+
+async function apiRequest(method, path, body, auth){
+  const headers = {'Content-Type':'application/json'};
+  if(auth && authToken) headers['Authorization'] = 'Bearer ' + authToken;
+  const res = await fetch(API_BASE + path, {
+    method, headers,
+    body: (method==='POST') ? JSON.stringify(body||{}) : undefined,
+  });
+  let data = {};
+  try{ data = await res.json(); }catch(e){ /* 後端沒回應或網址不對 */ }
+  if(!res.ok) throw new Error(data.error || ('伺服器錯誤 ('+res.status+')'));
+  return data;
+}
+
+function setAuth(token, username){
+  authToken = token; authUsername = username;
+  localStorage.setItem('duelfield_token', token);
+  localStorage.setItem('duelfield_username', username);
+  renderAcctBar();
+}
+function clearAuth(){
+  authToken = null; authUsername = null;
+  localStorage.removeItem('duelfield_token');
+  localStorage.removeItem('duelfield_username');
+  renderAcctBar();
+}
+function isLoggedIn(){ return !!authToken; }
+
+function renderAcctBar(){
+  const info = document.getElementById('acct-info-text');
+  const action = document.getElementById('btn-acct-action');
+  if(isLoggedIn()){
+    info.innerHTML = `已登入：<b>${escapeHtml(authUsername)}</b>`;
+    action.textContent = '登出';
+  } else {
+    info.textContent = '尚未登入（可先以訪客身分遊玩，但戰績不會被記錄）';
+    action.textContent = '登入 / 註冊';
+  }
+}
+document.getElementById('btn-acct-action').onclick = ()=>{
+  if(isLoggedIn()){
+    clearAuth();
+  } else {
+    showScreen('screen-auth');
+    setNavActive(null);
+  }
+};
+
+/* ---- 登入／註冊畫面 ---- */
+let authMode = 'login';
+document.getElementById('tab-login').onclick = ()=>{ authMode='login'; updateAuthTabs(); };
+document.getElementById('tab-register').onclick = ()=>{ authMode='register'; updateAuthTabs(); };
+function updateAuthTabs(){
+  document.getElementById('tab-login').classList.toggle('active', authMode==='login');
+  document.getElementById('tab-register').classList.toggle('active', authMode==='register');
+  document.getElementById('btn-auth-submit').textContent = authMode==='login' ? '登入' : '註冊';
+  document.getElementById('auth-error').textContent = '';
+}
+document.getElementById('btn-auth-cancel').onclick = ()=>{ showScreen('screen-lobby'); setNavActive('screen-lobby'); };
+document.getElementById('btn-auth-submit').onclick = async ()=>{
+  const username = document.getElementById('auth-username').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-error');
+  errEl.textContent = '';
+  if(!username || !password){ errEl.textContent = '請輸入帳號與密碼'; return; }
+  try{
+    const path = authMode==='login' ? '/api/auth/login' : '/api/auth/register';
+    const data = await apiRequest('POST', path, {username, password}, false);
+    setAuth(data.token, data.username);
+    showScreen('screen-lobby'); setNavActive('screen-lobby');
+  }catch(e){
+    errEl.textContent = e.message + (e.message.includes('fetch') || e.message.includes('Failed') ? '（可能是後端網址沒設定或伺服器沒開）' : '');
+  }
+};
+
+/* ---- 排行榜畫面 ---- */
+async function loadMyStats(){
+  const panel = document.getElementById('my-stats-panel');
+  if(!isLoggedIn()){ panel.style.display='none'; return; }
+  try{
+    const data = await apiRequest('GET', '/api/me', null, true);
+    panel.style.display = 'block';
+    document.getElementById('stat-wins').textContent = data.stats.wins;
+    document.getElementById('stat-losses').textContent = data.stats.losses;
+    document.getElementById('stat-draws').textContent = data.stats.draws;
+    document.getElementById('stat-winrate').textContent = data.stats.winRate + '%';
+  }catch(e){ panel.style.display='none'; }
+}
+async function loadLeaderboard(){
+  const list = document.getElementById('leaderboard-list');
+  list.innerHTML = '<p class="empty-note">載入中…</p>';
+  try{
+    const data = await apiRequest('GET', '/api/leaderboard?limit=20', null, false);
+    if(data.leaderboard.length===0){ list.innerHTML = '<p class="empty-note">還沒有任何對戰紀錄</p>'; return; }
+    list.innerHTML = data.leaderboard.map((u,i)=>`
+      <div class="lb-row">
+        <span class="lb-rank">#${i+1}</span>
+        <span class="lb-name">${escapeHtml(u.username)}</span>
+        <span class="lb-stat">${u.wins}勝 ${u.losses}敗 ${u.draws}平 ・ 勝率 ${u.winRate}%</span>
+      </div>`).join('');
+  }catch(e){
+    list.innerHTML = `<p class="empty-note">讀取失敗：${escapeHtml(e.message)}（請確認 API_BASE 是否設定成你的後端網址）</p>`;
+  }
+}
+document.getElementById('btn-refresh-lb').onclick = ()=>{ loadLeaderboard(); loadMyStats(); };
+
+/* ---- 好友畫面 ---- */
+async function loadFriends(){
+  const note = document.getElementById('friends-login-note');
+  const content = document.getElementById('friends-content');
+  if(!isLoggedIn()){ note.style.display='block'; content.style.display='none'; return; }
+  note.style.display='none'; content.style.display='block';
+  try{
+    const data = await apiRequest('GET', '/api/friends', null, true);
+    const incomingPanel = document.getElementById('incoming-panel');
+    if(data.incomingRequests.length>0){
+      incomingPanel.style.display='block';
+      document.getElementById('incoming-list').innerHTML = data.incomingRequests.map(r=>`
+        <div class="friend-row">
+          <span class="fname">${escapeHtml(r.username)} 想加你好友</span>
+          <button class="btn" data-accept="${r.requestId}">接受</button>
+          <button class="btn secondary" data-decline="${r.requestId}">拒絕</button>
+        </div>`).join('');
+      incomingPanel.querySelectorAll('[data-accept]').forEach(btn=>{
+        btn.onclick = ()=> respondFriend(parseInt(btn.dataset.accept), true);
+      });
+      incomingPanel.querySelectorAll('[data-decline]').forEach(btn=>{
+        btn.onclick = ()=> respondFriend(parseInt(btn.dataset.decline), false);
+      });
+    } else { incomingPanel.style.display='none'; }
+
+    const friendsList = document.getElementById('friends-list');
+    friendsList.innerHTML = data.friends.length>0
+      ? data.friends.map(f=>`<div class="friend-row"><span class="fname">${escapeHtml(f)}</span></div>`).join('')
+      : '<p class="empty-note">還沒有好友，輸入對方帳號送出邀請看看！</p>';
+
+    const outgoingList = document.getElementById('outgoing-list');
+    outgoingList.innerHTML = data.outgoingRequests.length>0
+      ? '<p class="hint" style="margin-top:8px;">已送出邀請，等待對方接受：' + data.outgoingRequests.map(escapeHtml).join('、') + '</p>'
+      : '';
+  }catch(e){
+    document.getElementById('friends-list').innerHTML = `<p class="empty-note">讀取失敗：${escapeHtml(e.message)}</p>`;
+  }
+}
+async function respondFriend(requestId, accept){
+  try{ await apiRequest('POST', '/api/friends/respond', {requestId, accept}, true); loadFriends(); }
+  catch(e){ alert('操作失敗：'+e.message); }
+}
+document.getElementById('btn-add-friend').onclick = async ()=>{
+  const input = document.getElementById('add-friend-input');
+  const errEl = document.getElementById('friend-error');
+  errEl.textContent = '';
+  const toUsername = input.value.trim();
+  if(!toUsername){ return; }
+  try{
+    await apiRequest('POST', '/api/friends/request', {toUsername}, true);
+    input.value = '';
+    loadFriends();
+  }catch(e){ errEl.textContent = e.message; }
+};
+
+/* ---- 導覽列 ---- */
+function setNavActive(screenId){
+  document.querySelectorAll('#nav-row [data-nav]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.nav===screenId);
+  });
+}
+document.querySelectorAll('#nav-row [data-nav]').forEach(btn=>{
+  btn.onclick = ()=>{
+    const target = btn.dataset.nav;
+    showScreen(target);
+    setNavActive(target);
+    if(target==='screen-leaderboard'){ loadLeaderboard(); loadMyStats(); }
+    if(target==='screen-friends'){ loadFriends(); }
+  };
+});
+
+/* ---- 對戰結果回報（在 PART B 的 renderBattle 判斷 over 時呼叫）---- */
+let matchResultReported = false;
+async function reportMatchResultIfNeeded(){
+  if(matchResultReported || !game || !game.over) return;
+  matchResultReported = true;
+  const note = document.getElementById('match-report-note');
+  if(!isLoggedIn()) return; // 訪客不記錄戰績
+  const me = myPlayer();
+  let result = 'draw';
+  if(game.winner !== 'draw'){ result = (game.winner === myRole) ? 'win' : 'lose'; }
+  try{
+    await apiRequest('POST', '/api/match/report', {
+      matchUuid: game.matchUuid || ('local_' + Date.now()),
+      opponentUsername: oppUsername || null,
+      result, charKey: me.charKey, fieldKey: game.field.id,
+    }, true);
+    if(note) note.textContent = '✅ 戰績已記錄！可以到排行榜查看。';
+  }catch(e){
+    console.warn('戰績回報失敗：', e.message);
+    if(note) note.textContent = '⚠️ 戰績記錄失敗：' + e.message;
+  }
+}
+
+renderAcctBar();
+</script>
+<script>
+/* =========================================================================
    PART B — 連線層（PeerJS：免費公開訊號伺服器，瀏覽器之間直接 P2P 連線）
    架構：房主（Host）= 權威端，實際運算整個 Game 狀態；
         加入者（Client）= 只送出自己的選擇，並接收房主廣播的完整狀態來畫面顯示。
@@ -275,10 +600,14 @@ let peer = null, conn = null, isHost = false, myRole = null; // 'p1' = host, 'p2
 let game = null;
 let myChar = null, oppChar = null, oppCharReceived = null, hostFieldChoice = null;
 let pendingMyChoice = null;
+let oppUsername = null; // 對方的帳號名稱（若對方是訪客則為null），用於戰績回報
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  const hideNav = (id==='screen-select' || id==='screen-battle');
+  document.getElementById('acct-bar').style.display = hideNav ? 'none' : 'flex';
+  document.getElementById('nav-row').style.display = hideNav ? 'none' : 'flex';
 }
 
 function send(type, payload){ if(conn && conn.open) conn.send({type, payload}); }
@@ -313,6 +642,7 @@ function bindConnEvents(){
   conn.on('open', ()=>{
     document.getElementById('dot-status') && (document.getElementById('dot-status').className='conn-dot on');
     document.getElementById('conn-status-text') && (document.getElementById('conn-status-text').textContent='朋友已連線！');
+    send('identity', {username: isLoggedIn() ? authUsername : null});
     startCharacterSelect();
   });
   conn.on('data', onMessage);
@@ -321,7 +651,9 @@ function bindConnEvents(){
 
 function onMessage(msg){
   const {type, payload} = msg;
-  if(type==='char_pick'){
+  if(type==='identity'){
+    oppUsername = payload.username || null;
+  } else if(type==='char_pick'){
     oppCharReceived = payload.charKey;
     updateSelectStatus();
   } else if(type==='field_pick'){ // client 收到 host 選的場地
@@ -329,6 +661,7 @@ function onMessage(msg){
     tryStartGame();
   } else if(type==='game_start'){ // client 收到完整初始 state
     game = payload.game;
+    matchResultReported = false;
     showScreen('screen-battle');
     renderBattle();
   } else if(type==='action'){ // host 收到 client 的選擇
@@ -403,6 +736,8 @@ function tryStartGame(){
   if(btn.disabled) return;
   // host: p1 = host自己, p2 = client
   game = createGame(myChar, oppCharReceived, hostFieldChoice);
+  game.matchUuid = 'match_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  matchResultReported = false;
   send('game_start', {game});
   showScreen('screen-battle');
   renderBattle();
@@ -447,7 +782,8 @@ function renderBattle(){
   if(over){
     document.getElementById('action-panel').innerHTML = `<h2>對戰結束</h2><p class="center-note" style="font-size:18px; color:var(--gold);">${
       winner==='draw' ? '平手！' : (winner==='p1'? p1.label+'（'+p1.name+'）': p2.label+'（'+p2.name+'）') + ' 獲勝！'
-    }</p>`;
+    }</p><p class="center-note" id="match-report-note">${isLoggedIn() ? '戰績記錄中…' : '（訪客身分，本場戰績不會被記錄。登入後再戰一場就會自動記錄囉！）'}</p>`;
+    reportMatchResultIfNeeded();
     return;
   }
 
@@ -555,12 +891,6 @@ function tryResolveRound(){
   resolveRound(game, hostChoice, clientChoice); // p1=host, p2=client
   send('state_update', {game});
   renderBattle();
-}
-
-function escapeHtml(str){
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
 }
 
 /* =========================================================================
