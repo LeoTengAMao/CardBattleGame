@@ -336,6 +336,7 @@ function onMessage(msg){
     tryResolveRound();
   } else if(type==='state_update'){ // client 收到 host 結算後的最新狀態
     game = payload.game;
+    pendingMyChoice = null; // 回合已經結算完成，清除「已出牌、等待對方」的狀態，否則下一回合會卡住
     renderBattle();
   }
 }
