@@ -1,0 +1,9 @@
+{
+    "name": "duel-field-backend",
+    "version": "1.0.0",
+    "description": "決鬥力場後端伺服器",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js"
+    }
+  }
