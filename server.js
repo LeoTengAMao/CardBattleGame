@@ -120,6 +120,17 @@ function addRoute(method, path, opts, handler) {
   routes.push({ method, pattern, keys, auth: !!opts.auth, handler });
 }
 
+// ---- 顯示遊戲首頁 ----
+addRoute('GET', '/', ({ res, send }) => {
+  try {
+    const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(html);
+  } catch (e) {
+    send(404, { error: '找不到 index.html 遊戲檔案' });
+  }
+});
+
 function send(res, status, obj) {
   const body = JSON.stringify(obj);
   res.writeHead(status, {
