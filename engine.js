@@ -53,13 +53,16 @@ const ULTIMATE_DEFS = {
 };
 
 const CHARACTER_DEFS = {
-  rockfist: { id:'rockfist', name:'岩拳', archetype:'力量型', color:'#ff6a3d', maxHp:120,
+  rockfist: { id:'rockfist', name:'岩拳', archetype:'力量型', color:'#ff6a3d', maxHp:120, icon:'🪨',
+    lore:'曾是礦山深處的拆岩工，徒手擊碎過比人還高的岩塊。話不多，出拳前也不太需要理由——他相信，撐得住最多傷害的人，就是擂台上活到最後的人。',
     passive:{name:'鋼鐵之軀', desc:'受到的傷害固定減免10%', damageTakenMult:0.9},
     skillIds:['heavy_hammer','charge_dash'], ultimateId:'earth_split' },
-  swiftshadow: { id:'swiftshadow', name:'疾影', archetype:'速度型', color:'#4fd6e0', maxHp:80,
+  swiftshadow: { id:'swiftshadow', name:'疾影', archetype:'速度型', color:'#4fd6e0', maxHp:80, icon:'🌀',
+    lore:'沒有人看清楚過她出手的瞬間。在對手反應過來之前，她早已欺身而上、又退回安全距離——速度，是她唯一願意依賴的防具。',
     passive:{name:'瞬步', desc:'每回合第一次使用移動類卡牌不消耗AP', freeFirstMove:true},
     skillIds:['chain_stab','afterimage_step'], ultimateId:'afterimage_slash' },
-  strategist: { id:'strategist', name:'謀士', archetype:'控制型', color:'#9b7fd4', maxHp:100,
+  strategist: { id:'strategist', name:'謀士', archetype:'控制型', color:'#9b7fd4', maxHp:100, icon:'🔮',
+    lore:'從不主動出第一拳。他更喜歡讓對手先動，再用一個又一個的束縛與心理戰，把整場戰鬥的節奏，悄悄收進自己手裡。',
     passive:{name:'洞察', desc:'被動觀察對手動向（視覺化呈現留待擴充）'},
     skillIds:['bind_seal','mind_shock'], ultimateId:'absolute_lockdown' },
 };
@@ -111,6 +114,23 @@ function getApCost(self, card){
   const isMove = card.kind==='move' || card.kind==='move_attack';
   if(isMove && self.passive.freeFirstMove && !self.usedFreeMoveThisRound) return 0;
   return card.apCost;
+}
+// 真正從AP池扣除這回合出牌的花費（之前只有顯示用的 getApCost 判斷「是否付得起」，
+// 但實際上沒有任何地方真的把 AP 扣掉，導致 AP 數值看起來像裝飾品）。
+function deductApCost(self, info){
+  if(info.kind==='ultimate'){
+    self.ap = Math.max(0, self.ap - info.def.apCost);
+    return;
+  }
+  if(info.kind!=='universal' && info.kind!=='skill') return; // 'none' 不消耗AP
+  const card = info.card;
+  const isMove = card.kind==='move' || card.kind==='move_attack';
+  let cost = card.apCost;
+  if(isMove && self.passive.freeFirstMove && !self.usedFreeMoveThisRound){
+    cost = 0;
+    self.usedFreeMoveThisRound = true; // 這個回合的免費移動額度用掉了
+  }
+  self.ap = Math.max(0, self.ap - cost);
 }
 function createGame(charKey1, charKey2, fieldKey){
   const field = Object.assign({}, FIELD_DEFS[fieldKey]);
@@ -276,6 +296,7 @@ function resolveRound(game, choice1, choice2){
   const info1 = p1.status.cantActThisRound ? resolveChoiceInfo(p1, makeNoneChoice()) : resolveChoiceInfo(p1, choice1);
   const info2 = p2.status.cantActThisRound ? resolveChoiceInfo(p2, makeNoneChoice()) : resolveChoiceInfo(p2, choice2);
   markRoundFlags(p1, info1); markRoundFlags(p2, info2);
+  deductApCost(p1, info1); deductApCost(p2, info2);
   applyMovement(game,p1,p2,info1); applyMovement(game,p2,p1,info2);
   const distance = Math.abs(p1.pos-p2.pos);
   pushLog(game, `場上距離：${distance} 格（${p1.label} 在第${p1.pos}格，${p2.label} 在第${p2.pos}格）`);
@@ -295,7 +316,7 @@ function resolveRound(game, choice1, choice2){
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     CARD_DEFS, SKILL_DEFS, ULTIMATE_DEFS, CHARACTER_DEFS, FIELD_DEFS,
-    createGame, resolveRound, getEffectiveCard, getUltimate, getApCost,
+    createGame, resolveRound, getEffectiveCard, getUltimate, getApCost, deductApCost,
     HAND_SIZE, MAX_AP, MAX_RAGE, MAX_ROUNDS,
   };
 }

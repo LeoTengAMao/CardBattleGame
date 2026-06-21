@@ -120,22 +120,56 @@
   .token.p2{ background:var(--p2); }
   .distance-tag{ text-align:center; font-size:12px; color:var(--ink-dim); margin-top:6px; }
 
-  /* hand / action area */
-  .hand-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:10px; margin-top:6px; }
+  /* hand / action area — 卡牌設計：直式卡面，模仿實體卡牌的比例與版面 */
+  .hand-grid{ display:flex; flex-wrap:wrap; gap:14px; margin-top:10px; justify-content:center; }
   .card{
-    background:var(--bg-card); border:1px solid var(--line); border-radius:10px; padding:12px;
-    cursor:pointer; transition:border-color .15s, transform .12s;
+    width:148px; min-height:212px; display:flex; flex-direction:column;
+    background:var(--bg-card); border:1px solid var(--line); border-radius:14px;
+    cursor:pointer; transition:border-color .15s, transform .15s, box-shadow .15s;
+    position:relative; overflow:hidden;
+    box-shadow:0 3px 0 rgba(0,0,0,0.35);
   }
-  .card:hover{ border-color:var(--gold); transform:translateY(-2px); }
-  .card.disabled{ opacity:0.35; cursor:not-allowed; transform:none; }
-  .card.locked{ opacity:0.25; cursor:not-allowed; border-color:var(--crimson); }
-  .card .cname{ font-weight:700; font-size:14px; margin-bottom:4px; }
-  .card .clvl{ font-size:10px; color:var(--gold); margin-left:4px; }
-  .card .cdesc{ font-size:11px; color:var(--ink-dim); line-height:1.5; }
-  .card .cap{ display:inline-block; margin-top:8px; font-size:10px; background:var(--gold-soft); color:var(--gold); padding:2px 7px; border-radius:20px; }
-  .card.ultimate{ border-color:var(--gold); background:linear-gradient(180deg, var(--gold-soft), var(--bg-card)); }
-  .dir-row{ display:flex; gap:8px; margin-top:8px; }
-  .dir-row button{ flex:1; font-size:11px; padding:6px; border-radius:6px; border:1px solid var(--line); background:var(--bg-raised); color:var(--ink); cursor:pointer; }
+  .card:hover{ border-color:var(--gold); transform:translateY(-6px); box-shadow:0 10px 16px rgba(0,0,0,0.4); }
+  .card.disabled{ opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+  .card.disabled:hover{ border-color:var(--line); transform:none; }
+  .card.locked{ opacity:0.4; cursor:not-allowed; border-color:var(--crimson); }
+
+  .card-art{
+    height:66px; display:flex; align-items:center; justify-content:center;
+    font-size:30px; position:relative; flex-shrink:0;
+    border-bottom:1px solid rgba(0,0,0,0.35);
+  }
+  .card-kind-attack .card-art{ background:linear-gradient(160deg, #4a1f1d, #2a1413); }
+  .card-kind-move .card-art{ background:linear-gradient(160deg, #16323f, #122530); }
+  .card-kind-move_attack .card-art{ background:linear-gradient(160deg, #3a2a17, #281c10); }
+  .card-kind-defend .card-art{ background:linear-gradient(160deg, #173a28, #12281d); }
+  .card-kind-dodge .card-art{ background:linear-gradient(160deg, #2a1d3a, #1d1428); }
+  .card-kind-special .card-art{ background:linear-gradient(160deg, #371d3a, #261428); }
+  .card.ultimate .card-art{ background:linear-gradient(160deg, #4a3713, #2c2009); }
+
+  .card-cost{
+    position:absolute; top:7px; left:7px; width:27px; height:27px; border-radius:50%;
+    background:var(--gold); color:#23190a; font-family:'Bebas Neue'; font-size:15px;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 4px rgba(0,0,0,0.5);
+    border:2px solid #14161b;
+  }
+  .card-lv-pips{ position:absolute; top:9px; right:8px; display:flex; gap:3px; }
+  .card-lv-pips span{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.18); }
+  .card-lv-pips span.filled{ background:var(--gold); }
+
+  .card-body{ padding:9px 10px 10px; flex:1; display:flex; flex-direction:column; }
+  .card-type-tag{ font-size:8.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:2px; }
+  .card .cname{ font-weight:800; font-size:14px; line-height:1.2; margin-bottom:5px; }
+  .card .cdesc{ font-size:10.5px; color:var(--ink-dim); line-height:1.5; flex:1; }
+  .card-footer{ margin-top:8px; padding-top:7px; border-top:1px dashed var(--line); font-size:9.5px; color:var(--ink-dim); display:flex; justify-content:space-between; }
+  .card-locked-banner{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(20,22,27,0.78); color:var(--crimson); font-weight:800; font-size:12px; text-align:center; padding:10px; }
+
+  .card.ultimate{ border-color:var(--gold); box-shadow:0 3px 0 rgba(0,0,0,0.35), 0 0 14px rgba(227,176,75,0.18); }
+  .card.skip-card{ width:148px; min-height:212px; display:flex; align-items:center; justify-content:center; text-align:center; background:var(--bg-raised); border:1px dashed var(--line); border-radius:14px; cursor:pointer; padding:14px; color:var(--ink-dim); font-size:12px; }
+  .card.skip-card:hover{ border-color:var(--gold); color:var(--ink); }
+
+  .dir-row{ display:flex; gap:6px; margin-top:8px; }
+  .dir-row button{ flex:1; font-size:10.5px; padding:7px 4px; border-radius:6px; border:1px solid var(--line); background:var(--bg-raised); color:var(--ink); cursor:pointer; }
   .dir-row button:hover{ border-color:var(--gold); }
 
   .waiting-note{ text-align:center; padding:14px; color:var(--ink-dim); font-size:13px; }
@@ -179,6 +213,23 @@
   .lb-rank{ width:28px; font-family:'Bebas Neue'; font-size:18px; color:var(--gold); }
   .lb-name{ flex:1; font-weight:600; }
   .lb-stat{ color:var(--ink-dim); font-size:12px; }
+
+  /* ---- 角色介紹 ---- */
+  .bio-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px; margin-top:10px; }
+  .bio-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .bio-portrait{ height:120px; display:flex; align-items:center; justify-content:center; font-size:56px; position:relative; }
+  .bio-portrait .bio-archetype{ position:absolute; bottom:8px; left:12px; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.85); background:rgba(0,0,0,0.35); padding:3px 9px; border-radius:20px; }
+  .bio-body{ padding:16px; }
+  .bio-name{ font-family:'Bebas Neue'; font-size:28px; margin-bottom:8px; }
+  .bio-lore{ font-size:12.5px; color:var(--ink-dim); line-height:1.8; font-style:italic; border-left:2px solid var(--gold); padding-left:10px; margin-bottom:14px; }
+  .bio-stat-row{ display:flex; gap:10px; margin-bottom:12px; }
+  .bio-stat-row .stat-box{ flex:1; padding:8px; }
+  .bio-section{ margin-bottom:12px; }
+  .bio-section h4{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); margin:0 0 6px; }
+  .bio-ability{ background:var(--bg-raised); border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin-bottom:6px; font-size:12px; }
+  .bio-ability b{ display:block; margin-bottom:2px; }
+  .bio-ability span{ color:var(--ink-dim); font-size:11.5px; line-height:1.5; }
+  .bio-ability.bio-ultimate{ border-color:var(--gold); background:var(--gold-soft); }
   .friend-row{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--line); font-size:13px; }
   .friend-row:last-child{ border-bottom:none; }
   .friend-row .fname{ flex:1; font-weight:600; }
@@ -202,6 +253,7 @@
 
   <div class="nav-row" id="nav-row">
     <button class="btn secondary active" data-nav="screen-lobby">對戰</button>
+    <button class="btn secondary" data-nav="screen-characters">角色介紹</button>
     <button class="btn secondary" data-nav="screen-leaderboard">排行榜</button>
     <button class="btn secondary" data-nav="screen-friends">好友</button>
   </div>
@@ -223,6 +275,15 @@
         <button class="btn secondary" id="btn-auth-cancel">略過，先玩玩看</button>
       </div>
       <p class="hint" style="margin-top:14px;">登入後對戰結束會自動把結果記錄到你的帳號（勝/敗/平），可以在排行榜跟好友互相比較戰績。不想註冊也可以直接「略過」用訪客身分玩。</p>
+    </div>
+  </div>
+
+  <!-- ===== Screen Characters: 角色介紹 ===== -->
+  <div class="screen" id="screen-characters">
+    <div class="panel">
+      <h2>角色介紹</h2>
+      <p class="hint">點選角色查看完整背景故事、被動、技能牌與大招。</p>
+      <div class="bio-grid" id="bio-grid"></div>
     </div>
   </div>
 
@@ -551,6 +612,47 @@ document.getElementById('btn-add-friend').onclick = async ()=>{
   }catch(e){ errEl.textContent = e.message; }
 };
 
+/* ---- 角色介紹 ---- */
+function renderCharacterBios(){
+  const grid = document.getElementById('bio-grid');
+  if(grid.dataset.rendered) return; // 內容固定，渲染一次即可
+  grid.dataset.rendered = '1';
+  grid.innerHTML = Object.values(CHARACTER_DEFS).map(def=>{
+    const skillsHtml = def.skillIds.map(sid=>{
+      const s = SKILL_DEFS[sid];
+      return `<div class="bio-ability"><b>${s.name}</b><span>${s.desc}</span></div>`;
+    }).join('');
+    const ult = ULTIMATE_DEFS[def.ultimateId];
+    return `
+      <div class="bio-card">
+        <div class="bio-portrait" style="background:linear-gradient(160deg, ${def.color}33, #14161b);">
+          ${def.icon || '🎴'}
+          <span class="bio-archetype">${def.archetype}</span>
+        </div>
+        <div class="bio-body">
+          <div class="bio-name" style="color:${def.color};">${def.name}</div>
+          <p class="bio-lore">${def.lore || ''}</p>
+          <div class="bio-stat-row">
+            <div class="stat-box"><div class="num">${def.maxHp}</div><div class="lbl">HP</div></div>
+          </div>
+          <div class="bio-section">
+            <h4>被動・${def.passive.name}</h4>
+            <div class="bio-ability"><span>${def.passive.desc}</span></div>
+          </div>
+          <div class="bio-section">
+            <h4>技能牌</h4>
+            ${skillsHtml}
+          </div>
+          <div class="bio-section">
+            <h4>大招</h4>
+            <div class="bio-ability bio-ultimate"><b>🔥 ${ult.name}</b><span>${ult.desc}</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 /* ---- 導覽列 ---- */
 function setNavActive(screenId){
   document.querySelectorAll('#nav-row [data-nav]').forEach(b=>{
@@ -562,6 +664,7 @@ document.querySelectorAll('#nav-row [data-nav]').forEach(btn=>{
     const target = btn.dataset.nav;
     showScreen(target);
     setNavActive(target);
+    if(target==='screen-characters'){ renderCharacterBios(); }
     if(target==='screen-leaderboard'){ loadLeaderboard(); loadMyStats(); }
     if(target==='screen-friends'){ loadFriends(); }
   };
@@ -806,6 +909,79 @@ function fillPCard(key, p){
 function myPlayer(){ return myRole==='p1' ? game.p1 : game.p2; }
 function oppPlayer(){ return myRole==='p1' ? game.p2 : game.p1; }
 
+// 不同卡牌種類對應的圖示與中文類別名稱，用來畫出卡面上半部的「圖示區」
+function cardKindIcon(kind){
+  return { attack:'⚔️', move:'👟', move_attack:'💨', defend:'🛡️', dodge:'🌀', special:'🔮' }[kind] || '✦';
+}
+function cardKindLabel(kind){
+  return { attack:'攻擊牌', move:'移動牌', move_attack:'突進技', defend:'防禦牌', dodge:'迴避牌', special:'特殊技' }[kind] || '';
+}
+function cardFooterInfo(card){
+  if(card.kind==='attack') return `距離 ≤${card.distance}`;
+  if(card.kind==='move' || card.kind==='move_attack') return `移動 ${card.moveAmount}格`;
+  if(card.kind==='defend') return `減傷 ${Math.round(card.reduction*100)}%`;
+  if(card.kind==='dodge') return '完全閃避';
+  return '';
+}
+function buildCardElement(card, opts){
+  // opts: { apCost, level, locked, disabled, onClick, needsDirection, onApproach, onRetreat, isUltimate }
+  const div = document.createElement('div');
+  div.className = 'card card-kind-' + card.kind + (opts.isUltimate ? ' ultimate' : '') + (opts.locked ? ' locked' : (opts.disabled ? ' disabled' : ''));
+
+  const art = document.createElement('div');
+  art.className = 'card-art';
+  art.textContent = opts.isUltimate ? '🔥' : cardKindIcon(card.kind);
+
+  const costBadge = document.createElement('div');
+  costBadge.className = 'card-cost';
+  costBadge.textContent = opts.apCost;
+  art.appendChild(costBadge);
+
+  if(opts.level){
+    const pips = document.createElement('div');
+    pips.className = 'card-lv-pips';
+    for(let i=1;i<=3;i++){
+      const dot = document.createElement('span');
+      if(i<=opts.level) dot.className = 'filled';
+      pips.appendChild(dot);
+    }
+    art.appendChild(pips);
+  }
+  div.appendChild(art);
+
+  const body = document.createElement('div');
+  body.className = 'card-body';
+  const footerInfo = cardFooterInfo(card);
+  body.innerHTML = `
+    <div class="card-type-tag">${opts.isUltimate ? '大招' : cardKindLabel(card.kind)}</div>
+    <div class="cname">${card.name}</div>
+    <div class="cdesc">${card.desc}</div>
+    ${footerInfo ? `<div class="card-footer"><span>${footerInfo}</span></div>` : ''}
+  `;
+  div.appendChild(body);
+
+  if(opts.locked){
+    const banner = document.createElement('div');
+    banner.className = 'card-locked-banner';
+    banner.textContent = '已被對方鎖定';
+    div.appendChild(banner);
+  } else if(!opts.disabled){
+    if(opts.needsDirection){
+      const dirRow = document.createElement('div');
+      dirRow.className = 'dir-row';
+      const b1 = document.createElement('button'); b1.textContent='靠近';
+      const b2 = document.createElement('button'); b2.textContent='遠離';
+      b1.onclick = (e)=>{ e.stopPropagation(); opts.onApproach(); };
+      b2.onclick = (e)=>{ e.stopPropagation(); opts.onRetreat(); };
+      dirRow.appendChild(b1); dirRow.appendChild(b2);
+      body.appendChild(dirRow);
+    } else if(opts.onClick){
+      div.onclick = opts.onClick;
+    }
+  }
+  return div;
+}
+
 function renderActionPanel(){
   const me = myPlayer();
   const panel = document.getElementById('hand-grid');
@@ -835,41 +1011,30 @@ function renderActionPanel(){
     const card = getEffectiveCard(me, c.defId);
     const apCost = getApCost(me, card);
     const affordable = apCost <= me.ap;
-    const div = document.createElement('div');
-    div.className = 'card' + (locked ? ' locked' : (affordable ? '' : ' disabled'));
-    const lvlTag = card.level ? `<span class="clvl">Lv.${card.level}</span>` : '';
-    div.innerHTML = `<div class="cname">${card.name}${lvlTag}</div><div class="cdesc">${card.desc}</div><span class="cap">AP ${apCost}</span>`;
-    if(locked){
-      div.innerHTML += `<div style="margin-top:6px;font-size:10px;color:var(--crimson);">已被對方鎖定</div>`;
-    } else if(affordable){
-      if(card.needsDirection){
-        const dirRow = document.createElement('div');
-        dirRow.className = 'dir-row';
-        const b1 = document.createElement('button'); b1.textContent='靠近對方';
-        const b2 = document.createElement('button'); b2.textContent='遠離對方';
-        b1.onclick = (e)=>{ e.stopPropagation(); submitChoice({kind:card.type, cardUid:c.uid, direction:'approach'}); };
-        b2.onclick = (e)=>{ e.stopPropagation(); submitChoice({kind:card.type, cardUid:c.uid, direction:'retreat'}); };
-        dirRow.appendChild(b1); dirRow.appendChild(b2);
-        div.appendChild(dirRow);
-      } else {
-        div.onclick = ()=> submitChoice({kind:card.type, cardUid:c.uid});
-      }
-    }
+    const div = buildCardElement(card, {
+      apCost, level: card.level, locked, disabled: !affordable,
+      needsDirection: card.needsDirection,
+      onApproach: ()=> submitChoice({kind:card.type, cardUid:c.uid, direction:'approach'}),
+      onRetreat: ()=> submitChoice({kind:card.type, cardUid:c.uid, direction:'retreat'}),
+      onClick: ()=> submitChoice({kind:card.type, cardUid:c.uid}),
+    });
     panel.appendChild(div);
   });
 
   if(me.ultimateUnlocked){
     const ult = getUltimate(me);
-    const div = document.createElement('div');
-    div.className = 'card ultimate' + (ult.apCost<=me.ap ? '' : ' disabled');
-    div.innerHTML = `<div class="cname">🔥 ${ult.name}</div><div class="cdesc">${ult.desc}</div><span class="cap">AP ${ult.apCost}</span>`;
-    if(ult.apCost<=me.ap) div.onclick = ()=> submitChoice({kind:'ultimate'});
+    const affordable = ult.apCost <= me.ap;
+    const div = buildCardElement(
+      { name: ult.name, desc: ult.desc, kind:'special' },
+      { apCost: ult.apCost, disabled: !affordable, isUltimate: true,
+        onClick: ()=> submitChoice({kind:'ultimate'}) }
+    );
     panel.appendChild(div);
   }
 
   const skipDiv = document.createElement('div');
-  skipDiv.className = 'card';
-  skipDiv.innerHTML = `<div class="cname">不出牌</div><div class="cdesc">保留資源，本回合不行動</div>`;
+  skipDiv.className = 'card skip-card';
+  skipDiv.innerHTML = `<div><div style="font-size:22px;margin-bottom:6px;">🚫</div><div class="cname" style="font-size:13px;">不出牌</div><div class="cdesc" style="margin-top:4px;">保留資源<br>本回合不行動</div></div>`;
   skipDiv.onclick = ()=> submitChoice({kind:'none'});
   panel.appendChild(skipDiv);
 }
